@@ -10,9 +10,9 @@ function House(): null {
     "old_town_block.obj",
     scene,
     function (meshes) {
-      // let model = scene.getMeshByName("__root__");
+      let model = scene.getMeshByName("__root__");
       console.log("meshes is>>>", meshes);
-      // console.log("model is>>>", model);
+      console.log("model is>>>", model);
 
       // model.rotate(BABYLON.Axis.Y, Math.PI / 2, BABYLON.Space.WORLD);
       scene.createDefaultEnvironment({
