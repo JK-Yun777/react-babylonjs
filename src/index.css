@@ -6,7 +6,8 @@
 
 html,
 body,
-#root {
+#root,
+#babylonJS {
   width: 100%;
   height: 100%;
 }
