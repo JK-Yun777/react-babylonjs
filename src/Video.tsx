@@ -15,22 +15,19 @@ import Hls from "hls.js";
 function Video(): React.ReactElement | null {
   const scene: any = useScene();
 
-  const stream1 =
+  const videoUrl =
     "https://suwon-cdn.ezpmp.co.kr/Content/Lantour/KR/01_trip1920.m3u8";
-  const video = document.createElement("video");
+
   const parent = document.querySelector("#html");
-  video.setAttribute("src", stream1);
+  const video = document.createElement("video");
+  video.setAttribute("src", videoUrl);
   video.muted = true;
   parent?.appendChild(video);
 
-  const TV = MeshBuilder.CreatePlane(
-    "myPlane",
-    { width: 1.7, height: 1 },
-    scene
-  );
+  const TV = MeshBuilder.CreatePlane("plane", { width: 1.7, height: 1 }, scene);
   TV.rotate(Axis.Z, Math.PI, Space.WORLD);
 
-  const videoMat = new StandardMaterial("textVid", scene);
+  const videoMat = new StandardMaterial("videoMat", scene);
   const videoTexture = new VideoTexture("video", video, scene, true, true);
 
   videoMat.backFaceCulling = false;
@@ -40,7 +37,7 @@ function Video(): React.ReactElement | null {
 
   if (Hls.isSupported()) {
     const hls = new Hls();
-    hls.loadSource(stream1);
+    hls.loadSource(videoUrl);
     hls.attachMedia(video);
 
     hls.on(Hls.Events.MANIFEST_PARSED, function () {
@@ -59,7 +56,7 @@ function Video(): React.ReactElement | null {
       );
     });
   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = stream1;
+    video.src = videoUrl;
 
     video.addEventListener("loadedmetadata", function () {
       TV.actionManager = new ActionManager(scene);
