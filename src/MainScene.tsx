@@ -4,11 +4,10 @@ import {
   Vector3,
   PhysicsImpostor,
   MeshBuilder,
+  GlowLayer,
 } from "@babylonjs/core";
 import { useScene } from "react-babylonjs";
 import "@babylonjs/loaders";
-
-import Loader from "./Loader";
 
 function MainScene(): React.ReactElement | null {
   const scene: any = useScene();
@@ -17,12 +16,14 @@ function MainScene(): React.ReactElement | null {
     const model = SceneLoader.ImportMesh(
       "",
       "model/",
-      "exhibition.glb",
+      "room.glb",
       scene,
       function (meshes, particleSystems, skeletons, animationGroups) {
         const house = meshes[0];
         house.scaling.scaleInPlace(0.1);
         house.rotation = new Vector3(0, 1, 0);
+        console.log(animationGroups);
+        new GlowLayer("glow", scene);
 
         const bodyVisible = false;
         const box = MeshBuilder.CreateBox(
@@ -41,6 +42,12 @@ function MainScene(): React.ReactElement | null {
           { mass: 0 },
           scene
         );
+
+        // const anim = scene.getAnimationGroupByName(
+        //   "VRayLight004|Take 001|BaseLayer"
+        // );
+        // anim.start(true, 1.0, anim.from, anim.to, false);
+        // console.log(anim);
 
         // let house = scene.getMeshByName("__root__");
         // console.log("meshes is>>>", meshes);

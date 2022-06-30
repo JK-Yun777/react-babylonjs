@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Engine, PointLight, Scene, Skybox } from "react-babylonjs";
+import { Engine, Scene, Skybox } from "react-babylonjs";
 import { Vector3, Color3, Color4, CannonJSPlugin } from "@babylonjs/core";
 
 import "@babylonjs/core/Physics/physicsEngineComponent";
@@ -7,6 +7,7 @@ import * as CANNON from "cannon";
 
 import MainScene from "./MainScene";
 import Character from "./Character";
+import Video from "./Video";
 import Loader from "./Loader";
 
 window.CANNON = CANNON;
@@ -50,9 +51,10 @@ function App() {
               intensity={1}
               direction={Vector3.Up()}
             />
-            <pointLight name="omni" position={new Vector3(0, -1, 0)} />
+            <pointLight name="omni" position={new Vector3(1, 1, 0)} />
             <Skybox rootUrl={"model/skyboxTextures/skybox"} />
-            <MainScene />
+            {/* <MainScene /> */}
+            <Video />
             {/* <Character /> */}
           </>
         ) : (
