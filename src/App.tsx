@@ -36,8 +36,8 @@ function App() {
           name="camera1"
           target={Vector3.Zero()}
           alpha={(3 * Math.PI) / 4}
-          beta={Math.PI / 2.5}
-          radius={10}
+          beta={Math.PI / 2.2}
+          radius={1.4}
           angularSensibilityX={5000}
           angularSensibilityY={5000}
           wheelDeltaPercentage={0.01}
@@ -48,12 +48,12 @@ function App() {
           <>
             <hemisphericLight
               name="light1"
-              intensity={1}
+              intensity={2}
               direction={Vector3.Up()}
             />
-            <pointLight name="omni" position={new Vector3(1, 1, 0)} />
+            <pointLight name="omni" position={new Vector3(0, -1, 0)} />
             <Skybox rootUrl={"model/skyboxTextures/skybox"} />
-            {/* <MainScene /> */}
+            <MainScene />
             <Video />
             {/* <Character /> */}
           </>

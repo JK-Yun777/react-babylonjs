@@ -7,6 +7,8 @@ import {
   Space,
   ActionManager,
   ExecuteCodeAction,
+  Vector3,
+  Texture,
 } from "@babylonjs/core";
 import { useScene, Html } from "react-babylonjs";
 import "@babylonjs/loaders";
@@ -24,16 +26,27 @@ function Video(): React.ReactElement | null {
   video.muted = true;
   parent?.appendChild(video);
 
-  const TV = MeshBuilder.CreatePlane("plane", { width: 1.7, height: 1 }, scene);
-  TV.rotate(Axis.Z, Math.PI, Space.WORLD);
+  const TV = MeshBuilder.CreatePlane(
+    "plane",
+    { width: 0.2, height: 0.125 },
+    scene
+  );
+  TV.position = new Vector3(-0.17, 0.243, -0.045);
+  TV.rotation = new Vector3(-0.02, -0.8, (2 * Math.PI) / 2);
 
   const videoMat = new StandardMaterial("videoMat", scene);
   const videoTexture = new VideoTexture("video", video, scene, true, true);
-
   videoMat.backFaceCulling = false;
   videoMat.diffuseTexture = videoTexture;
   videoMat.emissiveColor = Color3.Black();
-  TV.material = videoMat;
+
+  const thumbMat = new StandardMaterial("thumbMat", scene);
+  const thumbnailTex = new Texture("model/thumbnail.jpg", scene);
+  thumbMat.backFaceCulling = false;
+  thumbMat.diffuseTexture = thumbnailTex;
+  thumbMat.emissiveColor = Color3.Black();
+
+  TV.material = thumbMat;
 
   if (Hls.isSupported()) {
     const hls = new Hls();
@@ -45,6 +58,7 @@ function Video(): React.ReactElement | null {
       TV.actionManager.registerAction(
         new ExecuteCodeAction(ActionManager.OnPickTrigger, function (event) {
           if (event) {
+            TV.material = videoMat;
             if (video.paused) {
               video.play();
               video.muted = false;

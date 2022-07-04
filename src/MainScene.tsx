@@ -16,12 +16,12 @@ function MainScene(): React.ReactElement | null {
     const model = SceneLoader.ImportMesh(
       "",
       "model/",
-      "room.glb",
+      "exhibition.glb",
       scene,
       function (meshes, particleSystems, skeletons, animationGroups) {
         const house = meshes[0];
         house.scaling.scaleInPlace(0.1);
-        house.rotation = new Vector3(0, 1, 0);
+        house.rotation = new Vector3(0.01, 2.34, 0);
         console.log(animationGroups);
         new GlowLayer("glow", scene);
 
