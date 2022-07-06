@@ -10,15 +10,15 @@ import {
 import { useScene } from "react-babylonjs";
 import "@babylonjs/loaders";
 
-interface ObjType {
+interface InputMapType {
   [index: string]: boolean;
 }
 
 function Character(): React.ReactElement | null {
-  const scene: any = useScene();
+  const scene = useScene()!;
 
   function createInputMap() {
-    const inputMap: ObjType = {};
+    const inputMap: InputMapType = {};
     scene.actionManager = new ActionManager(scene);
     scene.actionManager.registerAction(
       new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, function (evt) {
@@ -85,10 +85,10 @@ function Character(): React.ReactElement | null {
 
         let animating = true;
 
-        const walkAnim = scene.getAnimationGroupByName("Walking");
-        const walkBackAnim = scene.getAnimationGroupByName("WalkingBack");
-        const idleAnim = scene.getAnimationGroupByName("Idle");
-        const sambaAnim = scene.getAnimationGroupByName("Samba");
+        const walkAnim = scene.getAnimationGroupByName("Walking")!;
+        const walkBackAnim = scene.getAnimationGroupByName("WalkingBack")!;
+        const idleAnim = scene.getAnimationGroupByName("Idle")!;
+        const sambaAnim = scene.getAnimationGroupByName("Samba")!;
 
         //Rendering loop (executed for everyframe)
         scene.onBeforeRenderObservable.add(() => {

@@ -30,7 +30,6 @@ function Loader({
   const boxRef = useRef<Nullable<Mesh>>(null);
   const context = useContext(SceneLoaderContext);
   const scene = useScene();
-  console.log("fallbackLoaded>>>>>>");
 
   useEffect(() => {
     const node = new TransformNode("fallback-parent", scene);
@@ -82,7 +81,6 @@ function Loader({
   }, [position, width, height, depth, barColor, scene]);
 
   useEffect(() => {
-    console.log(context);
     if (boxRef.current) {
       const progressEvent = context?.lastProgress;
 
@@ -96,7 +94,7 @@ function Loader({
         boxRef.current.scaling = new Vector3(0, 1, 1);
       }
     }
-  }, [boxRef, context?.lastProgress]);
+  }, [boxRef, context?.lastProgress, context]);
 
   return null;
 }

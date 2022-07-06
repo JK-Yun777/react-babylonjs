@@ -3,8 +3,6 @@ import {
   Color3,
   StandardMaterial,
   VideoTexture,
-  Axis,
-  Space,
   ActionManager,
   ExecuteCodeAction,
   Vector3,
@@ -15,7 +13,7 @@ import "@babylonjs/loaders";
 import Hls from "hls.js";
 
 function Video(): React.ReactElement | null {
-  const scene: any = useScene();
+  const scene = useScene()!;
 
   const videoUrl =
     "https://suwon-cdn.ezpmp.co.kr/Content/Lantour/KR/01_trip1920.m3u8";

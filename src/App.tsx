@@ -16,17 +16,9 @@ const sceneLoaderPosition = new Vector3(0, 1.5, 0);
 
 function App() {
   const [isLoad, setIsLoad] = useState(false);
-  console.log("Loaded!!!!", isLoad);
 
   return (
-    <Engine
-      antialias
-      adaptToDeviceRatio
-      canvasId="babylonJS"
-      renderOptions={{
-        whenVisibleOnly: true,
-      }}
-    >
+    <Engine antialias adaptToDeviceRatio canvasId="babylonJS">
       <Scene
         clearColor={Color4.FromColor3(Color3.FromHexString("#f7f6f0"))}
         enablePhysics={[gravityVector, new CannonJSPlugin()]}
