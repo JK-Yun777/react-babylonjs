@@ -7,7 +7,6 @@ import * as CANNON from "cannon";
 
 import MainScene from "./MainScene";
 import Character from "./Character";
-import Video from "./Video";
 import Loader from "./Loader";
 
 window.CANNON = CANNON;
@@ -35,18 +34,18 @@ function App() {
           wheelDeltaPercentage={0.01}
           minZ={0.001}
         />
+        <hemisphericLight
+          name="light1"
+          intensity={2}
+          direction={Vector3.Up()}
+        />
+        <pointLight name="omni" position={new Vector3(0, -1, 0)} />
+
+        <Skybox rootUrl={"model/skyboxTextures/skybox"} />
 
         {isLoad ? (
           <>
-            <hemisphericLight
-              name="light1"
-              intensity={2}
-              direction={Vector3.Up()}
-            />
-            <pointLight name="omni" position={new Vector3(0, -1, 0)} />
-            <Skybox rootUrl={"model/skyboxTextures/skybox"} />
             <MainScene />
-            <Video />
             {/* <Character /> */}
           </>
         ) : (

@@ -5,9 +5,14 @@ import {
   PhysicsImpostor,
   MeshBuilder,
   GlowLayer,
+  StandardMaterial,
+  VideoTexture,
+  ActionManager,
+  ExecuteCodeAction,
 } from "@babylonjs/core";
-import { useScene } from "react-babylonjs";
+import { useScene, Html } from "react-babylonjs";
 import "@babylonjs/loaders";
+import Hls from "hls.js";
 
 function MainScene(): React.ReactElement | null {
   const scene = useScene()!;
@@ -16,32 +21,106 @@ function MainScene(): React.ReactElement | null {
     SceneLoader.ImportMesh(
       "",
       "model/",
-      "exhibition.glb",
+      "exhibition2.glb",
       scene,
       function (meshes, particleSystems, skeletons, animationGroups) {
         const house = meshes[0];
         house.scaling.scaleInPlace(0.1);
         house.rotation = new Vector3(0.01, 2.34, 0);
 
-        new GlowLayer("glow", scene);
+        // creactVideo
+        const videoUrl =
+          "https://suwon-cdn.ezpmp.co.kr/Content/Lantour/KR/01_trip1920.m3u8";
 
-        const bodyVisible = false;
-        const box = MeshBuilder.CreateBox(
-          "box1",
-          { width: 8, height: 8, depth: 0.0011 },
+        const parent = document.querySelector("#html");
+        const video = document.createElement("video");
+        video.setAttribute("src", videoUrl);
+        video.muted = true;
+        parent?.appendChild(video);
+
+        const TV = MeshBuilder.CreatePlane(
+          "plane",
+          { width: 0.2, height: 0.127 },
           scene
         );
-
-        box.position = new Vector3(0, 0.1, 0);
-        box.rotation = new Vector3(5.5 + -Math.PI / 4, Math.PI / 2, 0);
-        box.isVisible = bodyVisible;
-
-        box.physicsImpostor = new PhysicsImpostor(
-          box,
-          PhysicsImpostor.BoxImpostor,
-          { mass: 0 },
-          scene
+        TV.position = new Vector3(-0.155, 0.244, -0.04);
+        TV.rotation = new Vector3(-0.02, -0.8, (2 * Math.PI) / 2);
+        const videoMat = new StandardMaterial("videoMat", scene);
+        const videoTexture = new VideoTexture(
+          "video",
+          video,
+          scene,
+          true,
+          true
         );
+        videoMat.backFaceCulling = true;
+        videoMat.diffuseTexture = videoTexture;
+        TV.material = videoMat;
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(videoUrl);
+          hls.attachMedia(video);
+
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            TV.actionManager = new ActionManager(scene);
+            TV.actionManager.registerAction(
+              new ExecuteCodeAction(ActionManager.OnPickTrigger, function (
+                event
+              ) {
+                if (event) {
+                  videoMat.backFaceCulling = false;
+                  if (video.paused) {
+                    video.play();
+                    video.muted = false;
+                  } else {
+                    video.pause();
+                  }
+                }
+              })
+            );
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = videoUrl;
+
+          video.addEventListener("loadedmetadata", function () {
+            TV.actionManager = new ActionManager(scene);
+            TV.actionManager.registerAction(
+              new ExecuteCodeAction(ActionManager.OnPickTrigger, function (
+                event
+              ) {
+                if (event) {
+                  if (video.paused) {
+                    video.play();
+                    video.muted = false;
+                  } else {
+                    video.pause();
+                  }
+                }
+              })
+            );
+          });
+        }
+
+        // new GlowLayer("glow", scene);
+
+        // const bodyVisible = false;
+        // const box = MeshBuilder.CreateBox(
+        //   "box1",
+        //   { width: 8, height: 8, depth: 0.0011 },
+        //   scene
+        // );
+
+        // box.position = new Vector3(0, 0.1, 0);
+        // box.rotation = new Vector3(5.5 + -Math.PI / 4, Math.PI / 2, 0);
+        // box.isVisible = bodyVisible;
+
+        // box.physicsImpostor = new PhysicsImpostor(
+        //   box,
+        //   PhysicsImpostor.BoxImpostor,
+        //   { mass: 0 },
+        //   scene
+        // );
 
         // const anim = scene.getAnimationGroupByName(
         //   "VRayLight004|Take 001|BaseLayer"
@@ -63,7 +142,11 @@ function MainScene(): React.ReactElement | null {
     );
   }, [scene]);
 
-  return null;
+  return (
+    <>
+      <Html name="html" id="html"></Html>
+    </>
+  );
 }
 
 export default MainScene;
