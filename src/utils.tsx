@@ -1,155 +1,247 @@
-import React, { useRef, useContext, useEffect } from "react";
 import {
-  useScene,
-  SceneLoaderContext,
-  useSceneLoader,
-  LoaderStatus,
-  useCamera,
-} from "react-babylonjs";
-
-import {
-  MeshBuilder,
-  Nullable,
-  Mesh,
-  Vector3,
-  Matrix,
-  Color3,
-  StandardMaterial,
-  TransformNode,
-  ArcRotateCamera,
+  ActionManager,
+  ExecuteCodeAction,
   Scene,
+  Vector3,
+  DeviceSourceManager,
+  DeviceType,
+  Matrix,
+  PointerInput,
 } from "@babylonjs/core";
 
-interface SceneLoaderFallbackType {
-  position: Vector3;
-  width: number;
-  height?: number;
-  depth?: number;
-  barColor: Color3;
+import * as GUI from "@babylonjs/gui";
+
+interface InputMapType {
+  [index: string]: boolean;
 }
 
-export const SceneLoaderFallback: React.FC<SceneLoaderFallbackType> = ({
-  position,
-  width,
-  height,
-  depth,
-  barColor,
-}) => {
-  const boxRef = useRef<Nullable<Mesh>>(null);
-  const context = useContext(SceneLoaderContext);
-  const scene = useScene();
-  console.log("fallbackLoaded");
-  useEffect(() => {
-    const node = new TransformNode("fallback-parent", scene);
-    node.position = position;
+export function createInputMap(scene: Scene) {
+  const inputMap: InputMapType = {};
+  scene.actionManager = new ActionManager(scene);
+  scene.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, function (evt) {
+      inputMap[evt.sourceEvent.key] = evt.sourceEvent.type === "keydown";
+    })
+  );
+  scene.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnKeyUpTrigger, function (evt) {
+      inputMap[evt.sourceEvent.key] = evt.sourceEvent.type === "keydown";
+    })
+  );
 
-    const meshHeight = height ?? 1;
-    const meshDepth = depth ?? 0.1;
+  return inputMap;
+}
 
-    const progressBox = MeshBuilder.CreateBox(
-      "fallback-progress",
-      {
-        width,
-        height: meshHeight,
-        depth: meshDepth,
-      },
-      scene
-    );
-    progressBox.parent = node;
-    progressBox.position = new Vector3(width / 2, 0, 0);
-    progressBox.setPivotMatrix(Matrix.Translation(-width, 0, 0));
-    progressBox.setPreTransformMatrix(Matrix.Translation(-width / 2, 0, 0));
-
-    const boxMat = new StandardMaterial("fallback-mat", scene!);
-    boxMat.diffuseColor = barColor;
-    boxMat.specularColor = Color3.Black();
-    progressBox.material = boxMat;
-
-    boxRef.current = progressBox;
-
-    const backDepth = Math.min(depth ?? 0.1, 0.1);
-    const backBox = MeshBuilder.CreateBox(
-      "fallback-back",
-      {
-        width,
-        height: meshHeight,
-        depth: backDepth,
-      },
-      scene
-    );
-    backBox.parent = node;
-    backBox.position = new Vector3(0, 0, meshDepth / -2 + backDepth / -2);
-
-    return () => {
-      progressBox.dispose();
-      backBox.dispose();
-      node.dispose();
-      boxRef.current = null;
-    };
-  }, [position, width, height, depth, barColor, scene]);
-
-  useEffect(() => {
-    if (boxRef.current) {
-      const progressEvent = context?.lastProgress;
-
-      if (progressEvent) {
-        const progressPercent =
-          progressEvent.lengthComputable === true
-            ? progressEvent.loaded / progressEvent.total
-            : 0;
-        boxRef.current.scaling = new Vector3(progressPercent, 1, 1);
-      } else {
-        boxRef.current.scaling = new Vector3(0, 1, 1);
+export const controller = (targetObj: any, scene: Scene) => {
+  const inputMap = createInputMap(scene);
+  scene.onBeforeRenderObservable.add(function () {
+    if (targetObj) {
+      if (inputMap["w"] || inputMap["ArrowUp"]) {
+        console.log(targetObj.frontVector);
+        // targetObj.moveWithCollisions(
+        //   targetObj.frontVector.multiplyByFloats(
+        //     targetObj.speed,
+        //     targetObj.speed,
+        //     targetObj.speed
+        //   )
+        // );
+      }
+      if (inputMap["a"] || inputMap["ArrowLeft"]) {
+        targetObj.rotation.y -= 0.01;
+        targetObj.frontVector = new Vector3(
+          Math.sin(targetObj.rotation.y),
+          0,
+          Math.cos(targetObj.rotation.y)
+        );
+      }
+      if (inputMap["s"] || inputMap["ArrowDown"]) {
+        console.log(targetObj.frontVector);
+        // targetObj.moveWithCollisions(
+        //   targetObj.frontVector.multiplyByFloats(
+        //     -targetObj.speed,
+        //     -targetObj.speed,
+        //     -targetObj.speed
+        //   )
+        // );
+      }
+      if (inputMap["d"] || inputMap["ArrowRight"]) {
+        targetObj.rotation.y += 0.01;
+        targetObj.frontVector = new Vector3(
+          Math.sin(targetObj.rotation.y),
+          0,
+          Math.cos(targetObj.rotation.y)
+        );
       }
     }
-  }, [boxRef, context?.lastProgress]);
-
-  return null;
+  });
 };
 
-type SceneLoaderModelProps = {
-  position: Vector3;
-};
+export const initializeInput = function (scene: Scene, camera: any) {
+  const DSM = new DeviceSourceManager(scene.getEngine());
 
-export function SceneLoaderModels({ position }: SceneLoaderModelProps) {
-  console.log("sceneLoaded?????>>");
-  const rootUrl = "model/";
-  /*const loadedModel = */ useSceneLoader(rootUrl, "house.glb", undefined, {
-    reportProgress: true,
-    scaleToDimension: 2,
-    onModelLoaded: (loadedModel) => {
-      console.log("loadedModel>>", loadedModel);
-      if (loadedModel.status === LoaderStatus.Loaded) {
-        console.log("Model Loaded:", position, loadedModel);
-        loadedModel.rootMesh!.position = position;
-      } else {
-        console.log("Model not loaded", loadedModel);
+  DSM.onDeviceConnectedObservable.add((device) => {
+    // KEYBOARD CONFIG
+    if (device.deviceType === DeviceType.Keyboard) {
+      scene.onBeforeRenderObservable.add(() => {
+        let transformMatrix = Matrix.Zero();
+        let localDirection = Vector3.Zero();
+        let transformedDirection = Vector3.Zero();
+        let isMoving = false;
+
+        // WSAD keys
+        if (device.getInput(87) === 1) {
+          localDirection.z = 0.05;
+          isMoving = true;
+        }
+        if (device.getInput(83) === 1) {
+          localDirection.z = -0.05;
+          isMoving = true;
+        }
+        if (device.getInput(65) === 1) {
+          localDirection.x = -0.05;
+          isMoving = true;
+        }
+        if (device.getInput(68) === 1) {
+          localDirection.x = 0.05;
+          isMoving = true;
+        }
+
+        // Arrow keys (Left, Right, Up, Down)
+        if (device.getInput(37) === 1) {
+          camera.rotation.y -= 0.01;
+        }
+        if (device.getInput(39) === 1) {
+          camera.rotation.y += 0.01;
+        }
+        if (device.getInput(38) === 1) {
+          camera.rotation.x -= 0.01;
+        }
+        if (device.getInput(40) === 1) {
+          camera.rotation.x += 0.01;
+        }
+
+        if (isMoving) {
+          camera.getViewMatrix().invertToRef(transformMatrix);
+          Vector3.TransformNormalToRef(
+            localDirection,
+            transformMatrix,
+            transformedDirection
+          );
+          camera.position.addInPlace(transformedDirection);
+          // pipCamera.position.addInPlace(transformedDirection);
+        }
+      });
+    }
+    // POINTER CONFIG
+    else if (
+      device.deviceType === DeviceType.Mouse ||
+      device.deviceType === DeviceType.Touch
+    ) {
+      device.onInputChangedObservable.add((deviceData: any) => {
+        if (
+          deviceData.inputIndex === PointerInput.Horizontal &&
+          device.getInput(PointerInput.LeftClick) === 1
+        ) {
+          camera.rotation.y +=
+            (deviceData.currentState - deviceData.previousState) * 0.005;
+        }
+
+        if (
+          deviceData.inputIndex === PointerInput.Vertical &&
+          device.getInput(PointerInput.LeftClick) === 1
+        ) {
+          camera.rotation.x +=
+            (deviceData.currentState - deviceData.previousState) * 0.005;
+        }
+      });
+
+      // Move forward if 2 fingers are pressed against screen
+      if (!scene.beforeRender && device.deviceType === DeviceType.Touch) {
+        scene.beforeRender = () => {
+          let transformMatrix = Matrix.Zero();
+          let localDirection = Vector3.Zero();
+          let transformedDirection = Vector3.Zero();
+          let isMoving = false;
+
+          if (DSM.getDeviceSources(DeviceType.Touch).length === 2) {
+            localDirection.z = 0.1;
+            isMoving = true;
+          }
+
+          if (isMoving) {
+            camera.getViewMatrix().invertToRef(transformMatrix);
+
+            Vector3.TransformNormalToRef(
+              localDirection,
+              transformMatrix,
+              transformedDirection
+            );
+            camera.position.addInPlace(transformedDirection);
+            // pipCamera.position.addInPlace(transformedDirection);
+          }
+        };
       }
-    },
+    }
   });
 
-  return null;
+  return DSM;
+};
+
+let fullscreenGUI: any;
+
+function loadingScreen(scene: any, text: string) {
+  let loadingContainer = new GUI.Container();
+  let loadingBackground = new GUI.Rectangle();
+  let loadingText = new GUI.TextBlock();
+
+  if (text === "loadStart") {
+    if (!fullscreenGUI) {
+      fullscreenGUI = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+    }
+
+    loadingContainer.zIndex = 1000;
+
+    // loadingBackground.width = 10;
+    // loadingBackground.height = 10;
+    // loadingBackground.background = "Skyblue";
+
+    loadingText.text = "Loading...";
+    loadingText.left = 0.5;
+    loadingText.top = -100;
+    loadingText.fontSize = 32;
+    loadingText.color = "Black";
+
+    fullscreenGUI.addControl(loadingContainer);
+    // loadingContainer.addControl(loadingBackground);
+    loadingContainer.addControl(loadingText);
+  }
+
+  if (text === "Loaded") {
+    fullscreenGUI.dispose();
+    loadingContainer.dispose();
+    loadingBackground.dispose();
+    loadingText.dispose();
+  }
 }
 
-type CameraPosition = {
-  radius: number;
-};
+interface ILoadingScreen {
+  displayLoadingUI: () => void;
 
-export const MyCamera: React.FC<CameraPosition> = ({ radius }) => {
-  const camera = useCamera<ArcRotateCamera>((scene: Scene) => {
-    console.log("creating camera...");
-    return new ArcRotateCamera(
-      "camera1",
-      Math.PI / 2,
-      Math.PI * 0.45,
-      radius,
-      Vector3.Zero(),
-      scene
-    );
-  });
+  hideLoadingUI: () => void;
 
-  if (camera) {
-    camera.radius = radius;
+  loadingUIBackgroundColor: string;
+  loadingUIText: string;
+  scene?: Scene;
+}
+
+export class CustomLoadingScreen implements ILoadingScreen {
+  public loadingUIBackgroundColor!: string;
+  constructor(public loadingUIText: string, public scene: Scene) {}
+  public displayLoadingUI() {
+    loadingScreen(this.scene, this.loadingUIText);
   }
-  return null;
-};
+
+  public hideLoadingUI() {
+    loadingScreen(this.scene, "Loaded");
+  }
+}

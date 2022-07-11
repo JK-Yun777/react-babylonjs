@@ -1,5 +1,5 @@
-import React, { useRef, useContext, useEffect } from "react";
-import { useScene, SceneLoaderContext } from "react-babylonjs";
+import React, { useRef, useEffect } from "react";
+import { useScene } from "react-babylonjs";
 
 import {
   MeshBuilder,
@@ -18,6 +18,9 @@ interface LoaderType {
   height?: number;
   depth?: number;
   barColor: Color3;
+  totalContext?: number;
+  isProgressed?: boolean;
+  loaded?: number;
 }
 
 function Loader({
@@ -26,11 +29,13 @@ function Loader({
   height,
   depth,
   barColor,
+  totalContext,
+  isProgressed,
+  loaded,
 }: LoaderType): React.ReactElement | null {
   const boxRef = useRef<Nullable<Mesh>>(null);
-  const context = useContext(SceneLoaderContext);
   const scene = useScene();
-
+  console.log("???????");
   useEffect(() => {
     const node = new TransformNode("fallback-parent", scene);
     node.position = position;
@@ -72,29 +77,30 @@ function Loader({
     backBox.parent = node;
     backBox.position = new Vector3(0, 0, meshDepth / -2 + backDepth / -2);
 
+    if (isProgressed) backBox.isVisible = false;
+
     return () => {
       progressBox.dispose();
       backBox.dispose();
       node.dispose();
       boxRef.current = null;
     };
-  }, [position, width, height, depth, barColor, scene]);
+  }, [position, width, height, depth, barColor, isProgressed, scene]);
 
   useEffect(() => {
     if (boxRef.current) {
-      const progressEvent = context?.lastProgress;
+      const progressEvent = totalContext;
 
       if (progressEvent) {
         const progressPercent =
-          progressEvent.lengthComputable === true
-            ? progressEvent.loaded / progressEvent.total
-            : 0;
+          isProgressed === false ? loaded! / progressEvent : 0;
+
         boxRef.current.scaling = new Vector3(progressPercent, 1, 1);
       } else {
         boxRef.current.scaling = new Vector3(0, 1, 1);
       }
     }
-  }, [boxRef, context?.lastProgress, context]);
+  }, [boxRef, totalContext, loaded, isProgressed]);
 
   return null;
 }

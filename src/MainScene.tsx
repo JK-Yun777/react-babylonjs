@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   SceneLoader,
   Vector3,
@@ -9,13 +9,19 @@ import {
   VideoTexture,
   ActionManager,
   ExecuteCodeAction,
+  Color3,
 } from "@babylonjs/core";
 import { useScene, Html } from "react-babylonjs";
 import "@babylonjs/loaders";
 import Hls from "hls.js";
+import Loader from "./Loader";
 
 function MainScene(): React.ReactElement | null {
   const scene = useScene()!;
+  const [isLoad, setIsLoad] = useState(0);
+  const [isProgressed, setISProgressed] = useState(false);
+  const totalContext = 2542812;
+  // const totalContext = 3542812;
 
   useEffect(() => {
     SceneLoader.ImportMesh(
@@ -138,13 +144,30 @@ function MainScene(): React.ReactElement | null {
         //   createGround: false,
         // });
         // scene.createDefaultCameraOrLight(true, true, true);
+      },
+      function (evt) {
+        if (evt.loaded === totalContext) {
+          setISProgressed(true);
+        }
+
+        setIsLoad(evt.loaded);
       }
     );
-  }, [scene]);
+  }, [scene, isProgressed]);
 
   return (
     <>
       <Html name="html" id="html"></Html>
+      <Loader
+        position={new Vector3(0, 0, 0)}
+        width={0.6}
+        height={0.1}
+        depth={0.1}
+        barColor={Color3.FromHexString("#ff0000")}
+        totalContext={totalContext}
+        isProgressed={isProgressed}
+        loaded={isLoad}
+      />
     </>
   );
 }
