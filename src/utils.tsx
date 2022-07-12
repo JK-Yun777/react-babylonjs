@@ -1,79 +1,73 @@
 import {
-  ActionManager,
-  ExecuteCodeAction,
   Scene,
   Vector3,
   DeviceSourceManager,
   DeviceType,
   Matrix,
   PointerInput,
+  UniversalCamera,
+  ArcRotateCamera,
 } from "@babylonjs/core";
 
 import * as GUI from "@babylonjs/gui";
 
-interface InputMapType {
-  [index: string]: boolean;
+// interface InputMapType {
+//   [index: string]: boolean;
+// }
+
+interface CameraType {
+  scene: Scene;
+  position: Vector3;
+  target: Vector3;
+  rotation: Vector3;
 }
 
-export function createInputMap(scene: Scene) {
-  const inputMap: InputMapType = {};
-  scene.actionManager = new ActionManager(scene);
-  scene.actionManager.registerAction(
-    new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, function (evt) {
-      inputMap[evt.sourceEvent.key] = evt.sourceEvent.type === "keydown";
-    })
-  );
-  scene.actionManager.registerAction(
-    new ExecuteCodeAction(ActionManager.OnKeyUpTrigger, function (evt) {
-      inputMap[evt.sourceEvent.key] = evt.sourceEvent.type === "keydown";
-    })
-  );
-
-  return inputMap;
+interface ArcCameraType extends CameraType {
+  alpha: number;
+  beta: number;
+  radius: number;
 }
 
-export const controller = (targetObj: any, scene: Scene) => {
-  const inputMap = createInputMap(scene);
-  scene.onBeforeRenderObservable.add(function () {
-    if (targetObj) {
-      if (inputMap["w"] || inputMap["ArrowUp"]) {
-        console.log(targetObj.frontVector);
-        // targetObj.moveWithCollisions(
-        //   targetObj.frontVector.multiplyByFloats(
-        //     targetObj.speed,
-        //     targetObj.speed,
-        //     targetObj.speed
-        //   )
-        // );
-      }
-      if (inputMap["a"] || inputMap["ArrowLeft"]) {
-        targetObj.rotation.y -= 0.01;
-        targetObj.frontVector = new Vector3(
-          Math.sin(targetObj.rotation.y),
-          0,
-          Math.cos(targetObj.rotation.y)
-        );
-      }
-      if (inputMap["s"] || inputMap["ArrowDown"]) {
-        console.log(targetObj.frontVector);
-        // targetObj.moveWithCollisions(
-        //   targetObj.frontVector.multiplyByFloats(
-        //     -targetObj.speed,
-        //     -targetObj.speed,
-        //     -targetObj.speed
-        //   )
-        // );
-      }
-      if (inputMap["d"] || inputMap["ArrowRight"]) {
-        targetObj.rotation.y += 0.01;
-        targetObj.frontVector = new Vector3(
-          Math.sin(targetObj.rotation.y),
-          0,
-          Math.cos(targetObj.rotation.y)
-        );
-      }
-    }
-  });
+export const createUniversalCamera = ({
+  scene,
+  position,
+  target,
+  rotation,
+}: CameraType) => {
+  const camera = new UniversalCamera(
+    "camera1",
+    // new Vector3(2, 0.5, -25),
+    position,
+    scene
+  );
+  camera.setTarget(target);
+  camera.rotation = rotation;
+  // camera.setTarget(new Vector3(1, 0, -10));
+  // camera.rotation = new Vector3(0, 0, 0);
+  return camera;
+};
+
+export const createArcRotateCamera = ({
+  scene,
+  position,
+  target,
+  rotation,
+  alpha,
+  beta,
+  radius,
+}: ArcCameraType) => {
+  const camera = new ArcRotateCamera(
+    "camera1",
+    alpha,
+    beta,
+    radius,
+    position,
+    scene
+  );
+  camera.setTarget(target!);
+  camera.rotation = rotation;
+
+  return camera;
 };
 
 export const initializeInput = function (scene: Scene, camera: any) {
@@ -189,59 +183,55 @@ export const initializeInput = function (scene: Scene, camera: any) {
 
 let fullscreenGUI: any;
 
-function loadingScreen(scene: any, text: string) {
-  let loadingContainer = new GUI.Container();
-  let loadingBackground = new GUI.Rectangle();
-  let loadingText = new GUI.TextBlock();
+function loadingScreen(text: string) {
+  let loadingContainer = new GUI.Container()!;
+  let loadingText = new GUI.TextBlock()!;
 
-  if (text === "loadStart") {
-    if (!fullscreenGUI) {
-      fullscreenGUI = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-    }
+  if (!fullscreenGUI) {
+    fullscreenGUI = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+  }
 
+  if (text === "startLoading") {
     loadingContainer.zIndex = 1000;
-
-    // loadingBackground.width = 10;
-    // loadingBackground.height = 10;
-    // loadingBackground.background = "Skyblue";
 
     loadingText.text = "Loading...";
     loadingText.left = 0.5;
     loadingText.top = -100;
     loadingText.fontSize = 32;
-    loadingText.color = "Black";
+    loadingText.color = "Skyblue";
+
+    // background
+    // let loadingBackground = new GUI.Rectangle();
+    // loadingBackground.width = 10;
+    // loadingBackground.height = 10;
+    // loadingBackground.background = "Skyblue";
+    // loadingContainer.addControl(loadingBackground);
 
     fullscreenGUI.addControl(loadingContainer);
-    // loadingContainer.addControl(loadingBackground);
     loadingContainer.addControl(loadingText);
-  }
-
-  if (text === "Loaded") {
+  } else if (text === "endLoading") {
     fullscreenGUI.dispose();
     loadingContainer.dispose();
-    loadingBackground.dispose();
     loadingText.dispose();
   }
 }
 
 interface ILoadingScreen {
   displayLoadingUI: () => void;
-
   hideLoadingUI: () => void;
-
   loadingUIBackgroundColor: string;
   loadingUIText: string;
-  scene?: Scene;
 }
 
 export class CustomLoadingScreen implements ILoadingScreen {
   public loadingUIBackgroundColor!: string;
-  constructor(public loadingUIText: string, public scene: Scene) {}
+  public loadingUIText!: string;
+
   public displayLoadingUI() {
-    loadingScreen(this.scene, this.loadingUIText);
+    loadingScreen("startLoading");
   }
 
   public hideLoadingUI() {
-    loadingScreen(this.scene, "Loaded");
+    loadingScreen("endLoading");
   }
 }

@@ -18,22 +18,22 @@ function City(): React.ReactElement | null {
   const totalContext = 9606868;
   // const totalContext = 3542812;
 
-  const createCamera = () => {
-    const camera = new ArcRotateCamera(
-      "camera1",
-      2.4,
-      (2.1 * Math.PI) / 4,
-      Math.PI / 1.9,
-      new Vector3(1.2, 0.22, 0),
-      scene
-    );
-    camera.attachControl();
-    camera.wheelDeltaPercentage = 0.01;
+  // const createCamera = () => {
+  //   const camera = new ArcRotateCamera(
+  //     "camera1",
+  //     2.4,
+  //     (2.1 * Math.PI) / 4,
+  //     Math.PI / 1.9,
+  //     new Vector3(1.2, 0.22, 0),
+  //     scene
+  //   );
+  //   camera.attachControl();
+  //   camera.wheelDeltaPercentage = 0.01;
 
-    return camera;
-  };
+  //   return camera;
+  // };
 
-  const camera = useMemo(createCamera, [scene]);
+  // const camera = useMemo(createCamera, [scene]);
 
   useEffect(() => {
     SceneLoader.ImportMesh(
@@ -50,7 +50,7 @@ function City(): React.ReactElement | null {
         const glow = new GlowLayer("glow", scene);
         glow.intensity = 0.3;
 
-        scene.activeCameras!.push(camera);
+        // scene.activeCameras!.push(camera);
       },
       function (evt) {
         // console.log(evt);
@@ -60,10 +60,21 @@ function City(): React.ReactElement | null {
         setIsLoad(evt.loaded);
       }
     );
-  }, [scene, isProgressed, camera]);
+  }, [scene, isProgressed]);
 
   return (
     <>
+      <arcRotateCamera
+        name="camera2"
+        target={new Vector3(1.2, 0.22, 0)}
+        alpha={(2.1 * Math.PI) / 4}
+        beta={Math.PI / 1.99}
+        radius={2.4}
+        angularSensibilityX={5000}
+        angularSensibilityY={5000}
+        wheelDeltaPercentage={0.01}
+        minZ={0.001}
+      />
       {!isProgressed ? (
         <Loader
           position={new Vector3(1.3, 0.3, 0)}

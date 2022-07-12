@@ -34,48 +34,23 @@ function App() {
         <Scene
           clearColor={Color4.FromColor3(Color3.FromHexString("#f7f6f0"))}
           enablePhysics={[gravityVector, new CannonJSPlugin()]}
-          // onReadyObservable={() => setIsLoad(true)}
         >
-          {/* <arcRotateCamera
-            name="camera1"
-            target={Vector3.Zero()}
-            alpha={(2.1 * Math.PI) / 4}
-            beta={Math.PI / 1.99}
-            radius={2.4}
-            angularSensibilityX={5000}
-            angularSensibilityY={5000}
-            wheelDeltaPercentage={0.01}
-            minZ={0.001}
-          /> */}
-          {/* <arcRotateCamera
-            name="camera2"
-            target={new Vector3(1.2, 0.22, 0)}
-            alpha={(2.1 * Math.PI) / 4}
-            beta={Math.PI / 1.99}
-            radius={2.4}
-            angularSensibilityX={5000}
-            angularSensibilityY={5000}
-            wheelDeltaPercentage={0.01}
-            minZ={0.001}
-          /> */}
-
           <hemisphericLight
             name="light1"
             intensity={2}
             direction={Vector3.Up()}
           />
 
-          {/* <pointLight name="omni" position={new Vector3(0, -1, 0)} /> */}
           <pointLight
-            name="cityPoint"
+            name="point"
             position={new Vector3(0, 10, 0)}
             intensity={0.5}
           />
 
           <Skybox rootUrl={"model/skyboxTextures/skybox"} />
-          {/* <MainScene /> */}
+          <MainScene />
           {/* <City /> */}
-          <FPV />
+          {/* <FPV /> */}
 
           {/* <sphere
             name="sphere1"
