@@ -11,10 +11,6 @@ import {
 
 import * as GUI from "@babylonjs/gui";
 
-// interface InputMapType {
-//   [index: string]: boolean;
-// }
-
 interface CameraType {
   scene: Scene;
   position: Vector3;
@@ -34,16 +30,9 @@ export const createUniversalCamera = ({
   target,
   rotation,
 }: CameraType) => {
-  const camera = new UniversalCamera(
-    "camera1",
-    // new Vector3(2, 0.5, -25),
-    position,
-    scene
-  );
+  const camera = new UniversalCamera("camera1", position, scene);
   camera.setTarget(target);
   camera.rotation = rotation;
-  // camera.setTarget(new Vector3(1, 0, -10));
-  // camera.rotation = new Vector3(0, 0, 0);
   return camera;
 };
 
@@ -76,6 +65,7 @@ export const initializeInput = function (scene: Scene, camera: any) {
   DSM.onDeviceConnectedObservable.add((device) => {
     // KEYBOARD CONFIG
     if (device.deviceType === DeviceType.Keyboard) {
+      console.log("111111");
       scene.onBeforeRenderObservable.add(() => {
         let transformMatrix = Matrix.Zero();
         let localDirection = Vector3.Zero();
@@ -132,6 +122,7 @@ export const initializeInput = function (scene: Scene, camera: any) {
       device.deviceType === DeviceType.Touch
     ) {
       device.onInputChangedObservable.add((deviceData: any) => {
+        console.log("22222", deviceData, PointerInput);
         if (
           deviceData.inputIndex === PointerInput.Horizontal &&
           device.getInput(PointerInput.LeftClick) === 1

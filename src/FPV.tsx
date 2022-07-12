@@ -21,6 +21,7 @@ function FPV(): React.ReactElement | null {
   };
 
   const camera = createUniversalCamera(cameraOptions);
+  camera.inputs.addMouseWheel();
 
   useEffect(() => {
     const loadingScreen = new CustomLoadingScreen();

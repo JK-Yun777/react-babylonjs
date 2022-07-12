@@ -48,9 +48,9 @@ function App() {
           />
 
           <Skybox rootUrl={"model/skyboxTextures/skybox"} />
-          <MainScene />
+          {/* <MainScene /> */}
           {/* <City /> */}
-          {/* <FPV /> */}
+          <FPV />
 
           {/* <sphere
             name="sphere1"
