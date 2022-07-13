@@ -1,27 +1,11 @@
-import { useEffect, useRef } from "react";
-import { Engine, Scene, Skybox, useScene } from "react-babylonjs";
-import {
-  Vector3,
-  Color3,
-  Color4,
-  CannonJSPlugin,
-  MeshBuilder,
-  StandardMaterial,
-  TransformNode,
-  Nullable,
-  Mesh,
-} from "@babylonjs/core";
+import { Engine, Scene, Skybox } from "react-babylonjs";
+import { Vector3, Color3, Color4, CannonJSPlugin } from "@babylonjs/core";
 
 import "@babylonjs/core/Physics/physicsEngineComponent";
 import * as CANNON from "cannon";
 
 import MainScene from "./MainScene";
-import Character from "./Character";
-import Loader from "./Loader";
-
-import Video from "./Video";
 import City from "./City";
-import Room from "./Room";
 import FPV from "./FPV";
 
 window.CANNON = CANNON;
@@ -48,9 +32,9 @@ function App() {
           />
 
           <Skybox rootUrl={"model/skyboxTextures/skybox"} />
-          {/* <MainScene /> */}
+          <MainScene />
           {/* <City /> */}
-          <FPV />
+          {/* <FPV /> */}
 
           {/* <sphere
             name="sphere1"

@@ -4,7 +4,6 @@ import {
   DeviceSourceManager,
   DeviceType,
   Matrix,
-  PointerInput,
   UniversalCamera,
   ArcRotateCamera,
 } from "@babylonjs/core";
@@ -59,13 +58,86 @@ export const createArcRotateCamera = ({
   return camera;
 };
 
-export const initializeInput = function (scene: Scene, camera: any) {
+export const initializeMouseInput = function (
+  scene: Scene,
+  camera: any,
+  canvas: any
+) {
+  // MOUSE CONFIG
+  const currentPosition = { x: 0, y: 0, z: 0 };
+  let clicked = false;
+  let wheeled = false;
+
+  canvas.addEventListener("wheel", function (evt: any) {
+    if (evt) {
+      wheeled = false;
+    }
+    scene.beforeRender = () => {
+      let transformMatrix = Matrix.Zero();
+      let localDirection = Vector3.Zero();
+      let transformedDirection = Vector3.Zero();
+      let isMoving = false;
+      currentPosition.z = evt.wheelDeltaY;
+
+      if (evt.wheelDeltaY > 0 && !wheeled) {
+        localDirection.z = 0.3;
+        isMoving = true;
+      }
+
+      if (evt.wheelDeltaY < 0 && !wheeled) {
+        localDirection.z = -0.3;
+        isMoving = true;
+      }
+
+      if (isMoving) {
+        camera.getViewMatrix().invertToRef(transformMatrix);
+
+        Vector3.TransformNormalToRef(
+          localDirection,
+          transformMatrix,
+          transformedDirection
+        );
+        camera.position.addInPlace(transformedDirection);
+        wheeled = true;
+      }
+    };
+  });
+
+  canvas.addEventListener("pointerdown", function (evt: any) {
+    currentPosition.x = evt.clientX;
+    currentPosition.y = evt.clientY;
+    clicked = true;
+  });
+
+  canvas.addEventListener("pointermove", function (evt: any) {
+    if (!clicked) {
+      return;
+    }
+
+    const dx = evt.clientX - currentPosition.x;
+    const dy = evt.clientY - currentPosition.y;
+
+    const angleX = dy * 0.001;
+    const angleY = dx * 0.001;
+
+    camera.rotation.y -= angleY;
+    camera.rotation.x -= angleX;
+
+    currentPosition.x = evt.clientX;
+    currentPosition.y = evt.clientY;
+  });
+
+  canvas.addEventListener("pointerup", function (evt: any) {
+    clicked = false;
+  });
+};
+
+export const initializeKeyboardInput = function (scene: Scene, camera: any) {
   const DSM = new DeviceSourceManager(scene.getEngine());
 
   DSM.onDeviceConnectedObservable.add((device) => {
     // KEYBOARD CONFIG
     if (device.deviceType === DeviceType.Keyboard) {
-      console.log("111111");
       scene.onBeforeRenderObservable.add(() => {
         let transformMatrix = Matrix.Zero();
         let localDirection = Vector3.Zero();
@@ -112,60 +184,34 @@ export const initializeInput = function (scene: Scene, camera: any) {
             transformedDirection
           );
           camera.position.addInPlace(transformedDirection);
-          // pipCamera.position.addInPlace(transformedDirection);
         }
       });
     }
-    // POINTER CONFIG
-    else if (
-      device.deviceType === DeviceType.Mouse ||
-      device.deviceType === DeviceType.Touch
-    ) {
-      device.onInputChangedObservable.add((deviceData: any) => {
-        console.log("22222", deviceData, PointerInput);
-        if (
-          deviceData.inputIndex === PointerInput.Horizontal &&
-          device.getInput(PointerInput.LeftClick) === 1
-        ) {
-          camera.rotation.y +=
-            (deviceData.currentState - deviceData.previousState) * 0.005;
+
+    // Move forward if 2 fingers are pressed against screen
+    else if (!scene.beforeRender && device.deviceType === DeviceType.Touch) {
+      scene.beforeRender = () => {
+        let transformMatrix = Matrix.Zero();
+        let localDirection = Vector3.Zero();
+        let transformedDirection = Vector3.Zero();
+        let isMoving = false;
+
+        if (DSM.getDeviceSources(DeviceType.Touch).length === 2) {
+          localDirection.z = 0.1;
+          isMoving = true;
         }
 
-        if (
-          deviceData.inputIndex === PointerInput.Vertical &&
-          device.getInput(PointerInput.LeftClick) === 1
-        ) {
-          camera.rotation.x +=
-            (deviceData.currentState - deviceData.previousState) * 0.005;
+        if (isMoving) {
+          camera.getViewMatrix().invertToRef(transformMatrix);
+
+          Vector3.TransformNormalToRef(
+            localDirection,
+            transformMatrix,
+            transformedDirection
+          );
+          camera.position.addInPlace(transformedDirection);
         }
-      });
-
-      // Move forward if 2 fingers are pressed against screen
-      if (!scene.beforeRender && device.deviceType === DeviceType.Touch) {
-        scene.beforeRender = () => {
-          let transformMatrix = Matrix.Zero();
-          let localDirection = Vector3.Zero();
-          let transformedDirection = Vector3.Zero();
-          let isMoving = false;
-
-          if (DSM.getDeviceSources(DeviceType.Touch).length === 2) {
-            localDirection.z = 0.1;
-            isMoving = true;
-          }
-
-          if (isMoving) {
-            camera.getViewMatrix().invertToRef(transformMatrix);
-
-            Vector3.TransformNormalToRef(
-              localDirection,
-              transformMatrix,
-              transformedDirection
-            );
-            camera.position.addInPlace(transformedDirection);
-            // pipCamera.position.addInPlace(transformedDirection);
-          }
-        };
-      }
+      };
     }
   });
 

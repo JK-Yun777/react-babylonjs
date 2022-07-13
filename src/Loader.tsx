@@ -35,7 +35,6 @@ function Loader({
 }: LoaderType): React.ReactElement | null {
   const boxRef = useRef<Nullable<Mesh>>(null);
   const scene = useScene();
-  console.log("???????");
   useEffect(() => {
     const node = new TransformNode("fallback-parent", scene);
     node.position = position;

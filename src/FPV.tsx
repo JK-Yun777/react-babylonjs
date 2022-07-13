@@ -1,17 +1,19 @@
 import { useEffect } from "react";
 import { SceneLoader, Vector3, GlowLayer } from "@babylonjs/core";
-import { useEngine, useScene } from "react-babylonjs";
+import { useCanvas, useEngine, useScene } from "react-babylonjs";
 import "@babylonjs/loaders";
 
 import {
-  initializeInput,
+  initializeKeyboardInput,
   CustomLoadingScreen,
   createUniversalCamera,
+  initializeMouseInput,
 } from "./utils";
 
 function FPV(): React.ReactElement | null {
   const scene = useScene()!;
   const engine = useEngine()!;
+  const canvas = useCanvas();
 
   const cameraOptions = {
     scene,
@@ -21,7 +23,6 @@ function FPV(): React.ReactElement | null {
   };
 
   const camera = createUniversalCamera(cameraOptions);
-  camera.inputs.addMouseWheel();
 
   useEffect(() => {
     const loadingScreen = new CustomLoadingScreen();
@@ -41,14 +42,15 @@ function FPV(): React.ReactElement | null {
 
           scene.activeCameras!.push(camera);
 
-          initializeInput(scene, camera);
+          initializeKeyboardInput(scene, camera);
+          initializeMouseInput(scene, camera, canvas);
         });
       },
       null,
       null,
       ".glb"
     );
-  }, [scene, engine, camera]);
+  }, [scene, engine, camera, canvas]);
 
   return null;
 }

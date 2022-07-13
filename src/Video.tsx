@@ -19,7 +19,6 @@ function Video(): React.ReactElement | null {
     "https://suwon-cdn.ezpmp.co.kr/Content/Lantour/KR/01_trip1920.m3u8";
 
   const parent = document.querySelector("#html");
-  console.log(parent);
   const video = document.createElement("video");
   video.setAttribute("src", videoUrl);
   video.muted = true;
