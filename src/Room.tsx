@@ -1,103 +1,114 @@
-import { useEffect, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import {
-  SceneLoader,
   Vector3,
-  PhysicsImpostor,
-  MeshBuilder,
   GlowLayer,
-  StandardMaterial,
-  VideoTexture,
   ActionManager,
   ExecuteCodeAction,
-  Color3,
+  DoNothingAction,
+  CombineAction,
 } from "@babylonjs/core";
-import { useScene, Html } from "react-babylonjs";
+import { Model, SceneLoaderContextProvider } from "react-babylonjs";
 import "@babylonjs/loaders";
-import Hls from "hls.js";
-import Loader from "./Loader";
+import ScaledModelWithProgress from "./ScaledModelWithProgress";
 
-function Room(): React.ReactElement | null {
-  const scene = useScene()!;
-  const [isLoad, setIsLoad] = useState(0);
-  const [isProgressed, setISProgressed] = useState(false);
-  const totalContext = 2687024;
-  // const totalContext = 3542812;
+function Room(props: any): React.ReactElement | null {
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  // const onModelLoadedHandler = (model: any) => {
+  //   const meshA = model.meshes[1];
+  //   meshA.actionManager = new ActionManager(meshA._scene);
+  //   meshA.actionManager
+  //     .registerAction(
+  //       new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
+  //         setIsZoomed((isZoomed) => !isZoomed);
+  //       })
+  //     )
+  //     .then(new DoNothingAction());
+
+  //   const meshB = model.meshes[2];
+  //   meshB.actionManager = new ActionManager(meshA._scene);
+  //   meshB.actionManager
+  //     .registerAction(
+  //       new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
+  //         setIsZoomed((isZoomed) => !isZoomed);
+  //       })
+  //     )
+  //     .then(new DoNothingAction());
+  // };
+
+  const onModelLoadedHandler = (model: any) => {
+    const meshA = model.meshes[1];
+    meshA.actionManager = new ActionManager(meshA._scene);
+    meshA.actionManager
+      .registerAction(
+        new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
+          setIsZoomed((isZoomed) => !isZoomed);
+        })
+      )
+      .then(
+        new CombineAction(ActionManager.NothingTrigger, [
+          new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
+            setIsZoomed((isZoomed) => !isZoomed);
+          }),
+        ])
+      );
+
+    const meshB = model.meshes[2];
+    meshB.actionManager = new ActionManager(meshA._scene);
+    meshB.actionManager
+      .registerAction(
+        new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
+          setIsZoomed((isZoomed) => !isZoomed);
+        })
+      )
+      .then(
+        new CombineAction(ActionManager.NothingTrigger, [
+          new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
+            setIsZoomed((isZoomed) => !isZoomed);
+          }),
+        ])
+      );
+  };
+
+  let targetPosition = new Vector3(-1.5, 0, 1.5);
+  let resetPosition = Vector3.Zero();
 
   useEffect(() => {
-    SceneLoader.ImportMesh(
-      "",
-      "model/",
-      "roomWithoutPlane.glb",
-      scene,
-      function (meshes, particleSystems, skeletons, animationGroups) {
-        const room = meshes[0];
-        room.scaling.scaleInPlace(0.1);
-        room.position = new Vector3(-1.8, 0, 1);
-        room.rotation = new Vector3(0, -0.8, 0);
-
-        const glow = new GlowLayer("glow", scene);
-        glow.intensity = 0.3;
-
-        // const bodyVisible = false;
-        // const box = MeshBuilder.CreateBox(
-        //   "box1",
-        //   { width: 8, height: 8, depth: 0.0011 },
-        //   scene
-        // );
-
-        // box.position = new Vector3(0, 0.1, 0);
-        // box.rotation = new Vector3(5.5 + -Math.PI / 4, Math.PI / 2, 0);
-        // box.isVisible = bodyVisible;
-
-        // box.physicsImpostor = new PhysicsImpostor(
-        //   box,
-        //   PhysicsImpostor.BoxImpostor,
-        //   { mass: 0 },
-        //   scene
-        // );
-
-        // const anim = scene.getAnimationGroupByName(
-        //   "VRayLight004|Take 001|BaseLayer"
-        // );
-        // anim.start(true, 1.0, anim.from, anim.to, false);
-        // console.log(anim);
-
-        // let house = scene.getMeshByName("__root__");
-        // console.log("meshes is>>>", meshes);
-        // console.log("model is>>>", house);
-
-        // model.rotate(Axis.Y, Math.PI / 2, Space.WORLD);
-        // scene.createDefaultEnvironment({
-        //   createSkybox: false,
-        //   createGround: false,
-        // });
-        // scene.createDefaultCameraOrLight(true, true, true);
-      },
-      function (evt) {
-        console.log(evt);
-        if (evt.loaded === totalContext) {
-          setISProgressed(true);
-        }
-
-        setIsLoad(evt.loaded);
-      }
-    );
-  }, [scene, isProgressed]);
+    if (isZoomed) {
+      props.target({ position: targetPosition, isZoomed });
+    } else {
+      props.target({ position: resetPosition, isZoomed });
+    }
+  }, [isZoomed]);
 
   return (
     <>
-      {!isProgressed ? (
-        <Loader
-          position={new Vector3(0, 0, 0)}
-          width={0.6}
-          height={0.1}
-          depth={0.1}
-          barColor={Color3.FromHexString("#ff0000")}
-          totalContext={totalContext}
-          isProgressed={isProgressed}
-          loaded={isLoad}
-        />
-      ) : null}
+      {/* <ScaledModelWithProgress
+        rootUrl="model/"
+        sceneFilename="roomWithoutPlane.glb"
+        scaleTo={1}
+        progressBarColor={Color3.FromInts(255, 165, 0)}
+        center={new Vector3(-1.5, -0.03, 1.5)}
+        onModelLoaded={onModelLoaded}
+      /> */}
+
+      <SceneLoaderContextProvider>
+        <Suspense
+          fallback={
+            <box name="fallback" position={new Vector3(-2.5, -1.5, 0)} />
+          }
+        >
+          <Model
+            name="model"
+            reportProgress
+            rootUrl="model/"
+            sceneFilename="roomWithoutPlane.glb"
+            scaleToDimension={1}
+            position={new Vector3(-1.5, -0.03, 1.5)}
+            onModelLoaded={(e) => onModelLoadedHandler(e)}
+          />
+        </Suspense>
+      </SceneLoaderContextProvider>
     </>
   );
 }
