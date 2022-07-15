@@ -4,7 +4,6 @@ import {
   GlowLayer,
   ActionManager,
   ExecuteCodeAction,
-  DoNothingAction,
   CombineAction,
 } from "@babylonjs/core";
 import { Model, SceneLoaderContextProvider } from "react-babylonjs";
@@ -48,8 +47,8 @@ function Minicity(props: any): React.ReactElement | null {
       );
   };
 
-  let targetPosition = new Vector3(0, 0.2, 3);
-  let resetPosition = Vector3.Zero();
+  const targetPosition = new Vector3(0, 0.2, 3);
+  const resetPosition = Vector3.Zero();
 
   useEffect(() => {
     if (isZoomed) {

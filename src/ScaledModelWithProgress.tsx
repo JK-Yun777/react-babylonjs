@@ -19,7 +19,7 @@ const ProgressFallback = (props: any) => {
 
   return (
     <transformNode
-      name="load-mesh"
+      name="loadMesh"
       rotation={props.rotation}
       position={props.center}
     >
@@ -35,7 +35,7 @@ const ProgressFallback = (props: any) => {
         setPreTransformMatrix={[Matrix.Translation(-props.scaleTo / 2, 0, 0)]}
       >
         <standardMaterial
-          name="progress-mat"
+          name="progressMat"
           diffuseColor={props.progressBarColor}
           specularColor={Color3.Black()}
         />

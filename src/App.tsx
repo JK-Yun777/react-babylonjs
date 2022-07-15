@@ -1,13 +1,6 @@
-import { useEffect, useState } from "react";
-import { Engine, Scene, Skybox, useScene } from "react-babylonjs";
-import {
-  Vector3,
-  Color3,
-  Color4,
-  CannonJSPlugin,
-  ActionManager,
-  ExecuteCodeAction,
-} from "@babylonjs/core";
+import { useState } from "react";
+import { Engine, Scene, Skybox } from "react-babylonjs";
+import { Vector3, Color3, Color4, CannonJSPlugin } from "@babylonjs/core";
 
 import "@babylonjs/core/Physics/physicsEngineComponent";
 import * as CANNON from "cannon";

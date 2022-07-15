@@ -4,7 +4,6 @@ import {
   GlowLayer,
   ActionManager,
   ExecuteCodeAction,
-  DoNothingAction,
   CombineAction,
 } from "@babylonjs/core";
 import { Model, SceneLoaderContextProvider } from "react-babylonjs";
@@ -48,8 +47,8 @@ function Store(props: any): React.ReactElement | null {
       );
   };
 
-  let targetPosition = new Vector3(0.5, 0, 0);
-  let resetPosition = Vector3.Zero();
+  const targetPosition = new Vector3(0.5, 0, 0);
+  const resetPosition = Vector3.Zero();
 
   useEffect(() => {
     if (isZoomed) {

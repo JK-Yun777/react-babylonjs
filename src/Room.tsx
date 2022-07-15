@@ -4,7 +4,6 @@ import {
   GlowLayer,
   ActionManager,
   ExecuteCodeAction,
-  DoNothingAction,
   CombineAction,
 } from "@babylonjs/core";
 import { Model, SceneLoaderContextProvider } from "react-babylonjs";
@@ -13,28 +12,6 @@ import ScaledModelWithProgress from "./ScaledModelWithProgress";
 
 function Room(props: any): React.ReactElement | null {
   const [isZoomed, setIsZoomed] = useState(false);
-
-  // const onModelLoadedHandler = (model: any) => {
-  //   const meshA = model.meshes[1];
-  //   meshA.actionManager = new ActionManager(meshA._scene);
-  //   meshA.actionManager
-  //     .registerAction(
-  //       new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
-  //         setIsZoomed((isZoomed) => !isZoomed);
-  //       })
-  //     )
-  //     .then(new DoNothingAction());
-
-  //   const meshB = model.meshes[2];
-  //   meshB.actionManager = new ActionManager(meshA._scene);
-  //   meshB.actionManager
-  //     .registerAction(
-  //       new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
-  //         setIsZoomed((isZoomed) => !isZoomed);
-  //       })
-  //     )
-  //     .then(new DoNothingAction());
-  // };
 
   const onModelLoadedHandler = (model: any) => {
     const meshA = model.meshes[1];
@@ -70,8 +47,8 @@ function Room(props: any): React.ReactElement | null {
       );
   };
 
-  let targetPosition = new Vector3(-1.5, 0, 1.5);
-  let resetPosition = Vector3.Zero();
+  const targetPosition = new Vector3(-1.5, 0, 1.5);
+  const resetPosition = Vector3.Zero();
 
   useEffect(() => {
     if (isZoomed) {
