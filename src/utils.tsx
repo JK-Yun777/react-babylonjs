@@ -6,6 +6,10 @@ import {
   Matrix,
   UniversalCamera,
   ArcRotateCamera,
+  Animation,
+  ActionManager,
+  ExecuteCodeAction,
+  CombineAction,
 } from "@babylonjs/core";
 
 import * as GUI from "@babylonjs/gui";
@@ -271,4 +275,358 @@ export class CustomLoadingScreen implements ILoadingScreen {
   public hideLoadingUI() {
     loadingScreen("endLoading");
   }
+}
+
+interface ResultType {
+  animations: any;
+  cameraSetting: any;
+}
+
+const frameRate = 20;
+
+function getTargetAnimations(
+  radius: number,
+  target: Vector3,
+  targetName: string
+) {
+  // camera zoom in animation
+  const zoomIn = new Animation(
+    "zoomIn",
+    "radius",
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  const zoomIn_keys = [];
+
+  zoomIn_keys.push({
+    frame: 0,
+    value: radius,
+  });
+
+  zoomIn_keys.push({
+    frame: 2 * frameRate,
+    value: radius - 2,
+  });
+
+  zoomIn_keys.push({
+    frame: 3 * frameRate,
+    value: radius - 3,
+  });
+
+  zoomIn.setKeys(zoomIn_keys);
+
+  //camera move forward
+  const movein = new Animation(
+    "movein",
+    "target",
+    frameRate,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  // for Room Model
+  const movein_room_keys = [];
+
+  movein_room_keys.push({
+    frame: 0,
+    value: Vector3.Zero(),
+  });
+
+  movein_room_keys.push({
+    frame: 1 * frameRate,
+    value: new Vector3(-0.5, 0, 0.5),
+  });
+
+  movein_room_keys.push({
+    frame: 2 * frameRate,
+    value: new Vector3(-1, 0, 1),
+  });
+
+  movein_room_keys.push({
+    frame: 3 * frameRate,
+    value: new Vector3(-1.5, 0, 1.5),
+  });
+
+  // for Store Model
+  const movein_store_keys = [];
+
+  movein_store_keys.push({
+    frame: 0,
+    value: Vector3.Zero(),
+  });
+
+  movein_store_keys.push({
+    frame: 1 * frameRate,
+    value: new Vector3(0.1, 0, 0),
+  });
+
+  movein_store_keys.push({
+    frame: 2 * frameRate,
+    value: new Vector3(0.3, 0, 0),
+  });
+
+  movein_store_keys.push({
+    frame: 3 * frameRate,
+    value: new Vector3(0.5, 0, 0),
+  });
+
+  // for MiniCity Model
+  const movein_miniCity_keys = [];
+
+  movein_miniCity_keys.push({
+    frame: 0,
+    value: Vector3.Zero(),
+  });
+
+  movein_miniCity_keys.push({
+    frame: 1 * frameRate,
+    value: new Vector3(0, 0.1, 1),
+  });
+
+  movein_miniCity_keys.push({
+    frame: 2 * frameRate,
+    value: new Vector3(0, 0.2, 2),
+  });
+
+  movein_miniCity_keys.push({
+    frame: 3 * frameRate,
+    value: new Vector3(0, 0.2, 3),
+  });
+
+  // for House Model
+  const movein_house_keys = [];
+
+  movein_house_keys.push({
+    frame: 0,
+    value: Vector3.Zero(),
+  });
+
+  movein_house_keys.push({
+    frame: 1 * frameRate,
+    value: new Vector3(0, 0, -1),
+  });
+
+  movein_house_keys.push({
+    frame: 2 * frameRate,
+    value: new Vector3(0, 0, -1.5),
+  });
+
+  movein_house_keys.push({
+    frame: 3 * frameRate,
+    value: new Vector3(0, 0, -2),
+  });
+
+  switch (targetName) {
+    case "room":
+      movein.setKeys(movein_room_keys);
+      return {
+        animations: [movein, zoomIn],
+        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(-1.5, 0, 1.5) },
+      };
+
+    case "store":
+      movein.setKeys(movein_store_keys);
+      return {
+        animations: [movein, zoomIn],
+        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(0.5, 0, 0) },
+      };
+
+    case "miniCity":
+      movein.setKeys(movein_miniCity_keys);
+      return {
+        animations: [movein, zoomIn],
+        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(0, 0.2, 3) },
+      };
+
+    case "house":
+      movein.setKeys(movein_house_keys);
+      return {
+        animations: [movein, zoomIn],
+        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(0, 0, -2) },
+      };
+  }
+}
+
+function getReturnAnimations(
+  radius: number,
+  target: Vector3,
+  targetName: string
+) {
+  // camera zoom out animation
+  const zoomOut = new Animation(
+    "zoomOut",
+    "radius",
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  const zoomOut_keys = [];
+
+  zoomOut_keys.push({
+    frame: 0,
+    value: 2.5,
+  });
+
+  zoomOut_keys.push({
+    frame: 2 * frameRate,
+    value: 3.5,
+  });
+
+  zoomOut_keys.push({
+    frame: 3 * frameRate,
+    value: 5.5,
+  });
+
+  zoomOut.setKeys(zoomOut_keys);
+
+  //camera move forward
+  const moveOut = new Animation(
+    "moveOut",
+    "target",
+    frameRate,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  // for Room Model
+
+  const moveOut_room_keys = [];
+
+  moveOut_room_keys.push({
+    frame: 0,
+    value: new Vector3(-1.5, 0, 1.5),
+  });
+
+  moveOut_room_keys.push({
+    frame: 1 * frameRate,
+    value: new Vector3(-1, 0, 1),
+  });
+
+  moveOut_room_keys.push({
+    frame: 2 * frameRate,
+    value: new Vector3(-0.5, 0, 0.5),
+  });
+
+  moveOut_room_keys.push({
+    frame: 3 * frameRate,
+    value: Vector3.Zero(),
+  });
+
+  // for Store Model
+  const moveOut_store_keys = [];
+
+  moveOut_store_keys.push({
+    frame: 0,
+    value: new Vector3(0.5, 0, 0),
+  });
+
+  moveOut_store_keys.push({
+    frame: 1 * frameRate,
+    value: new Vector3(0.3, 0, 0),
+  });
+
+  moveOut_store_keys.push({
+    frame: 2 * frameRate,
+    value: new Vector3(0.1, 0, 0),
+  });
+
+  moveOut_store_keys.push({
+    frame: 3 * frameRate,
+    value: Vector3.Zero(),
+  });
+
+  // for MiniCity Model
+  const moveOut_miniCity_keys = [];
+
+  moveOut_miniCity_keys.push({
+    frame: 0,
+    value: new Vector3(0, 0.2, 3),
+  });
+
+  moveOut_miniCity_keys.push({
+    frame: 1 * frameRate,
+    value: new Vector3(0, 0.2, 2),
+  });
+
+  moveOut_miniCity_keys.push({
+    frame: 2 * frameRate,
+    value: new Vector3(0, 0.1, 1),
+  });
+
+  moveOut_miniCity_keys.push({
+    frame: 3 * frameRate,
+    value: Vector3.Zero(),
+  });
+
+  // for House Model
+  const moveOut_house_keys = [];
+
+  moveOut_house_keys.push({
+    frame: 0,
+    value: new Vector3(0, 0, -2),
+  });
+
+  moveOut_house_keys.push({
+    frame: 5 * frameRate,
+    value: new Vector3(0, 0, -1.5),
+  });
+
+  moveOut_house_keys.push({
+    frame: 9 * frameRate,
+    value: new Vector3(0, 0, -1),
+  });
+
+  moveOut_house_keys.push({
+    frame: 10 * frameRate,
+    value: Vector3.Zero(),
+  });
+
+  switch (targetName) {
+    case "room":
+      moveOut.setKeys(moveOut_room_keys);
+      return [moveOut, zoomOut];
+
+    case "store":
+      moveOut.setKeys(moveOut_store_keys);
+      return [moveOut, zoomOut];
+
+    case "miniCity":
+      moveOut.setKeys(moveOut_miniCity_keys);
+      return [moveOut, zoomOut];
+
+    case "house":
+      moveOut.setKeys(moveOut_house_keys);
+      return [moveOut, zoomOut];
+  }
+}
+
+export function moveToTargetAnim(camera: any, scene: any, targetName: string) {
+  const result: any = getTargetAnimations(
+    camera.radius,
+    camera.target,
+    targetName
+  );
+
+  if (result) {
+    const { animations, cameraSetting } = result;
+    scene.beginDirectAnimation(camera, animations, 0, 25 * frameRate, true);
+
+    return cameraSetting;
+  }
+}
+
+export function returnToDefaultAnim(
+  camera: any,
+  scene: any,
+  targetName: string
+) {
+  const animations = getReturnAnimations(
+    camera.radius,
+    camera.target,
+    targetName
+  );
+  scene.beginDirectAnimation(camera, animations, 0, 25 * frameRate, true);
 }

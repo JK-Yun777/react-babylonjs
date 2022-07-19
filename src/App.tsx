@@ -12,6 +12,7 @@ import Room from "./Room";
 import MiniCity from "./MiniCity";
 import Store from "./Store";
 import House from "./House";
+import AnimationScenes from "./AnimationScenes";
 
 window.CANNON = CANNON;
 const gravityVector = new Vector3(0, -9.81, 0);
@@ -20,20 +21,20 @@ const initCameraRadius = 5.5;
 const zoomInCameraRadius = 2;
 
 function App() {
-  const [cameraTarget, setCameraTarget] = useState(initCameraTargetVector);
-  const [cameraRadius, setCameraRadius] = useState(initCameraRadius);
+  // const [cameraTarget, setCameraTarget] = useState(initCameraTargetVector);
+  // const [cameraRadius, setCameraRadius] = useState(initCameraRadius);
 
-  const cameraTargetHandler = (value: any) => {
-    const { position, isZoomed } = value;
+  // const cameraTargetHandler = (value: any) => {
+  //   const { position, isZoomed } = value;
 
-    if (isZoomed) {
-      setCameraTarget(position);
-      setCameraRadius(zoomInCameraRadius);
-    } else {
-      setCameraTarget(position);
-      setCameraRadius(initCameraRadius);
-    }
-  };
+  //   if (isZoomed) {
+  //     setCameraTarget(position);
+  //     setCameraRadius(zoomInCameraRadius);
+  //   } else {
+  //     setCameraTarget(position);
+  //     setCameraRadius(initCameraRadius);
+  //   }
+  // };
 
   return (
     <>
@@ -42,7 +43,7 @@ function App() {
           clearColor={Color4.FromColor3(Color3.FromHexString("#f7f6f0"))}
           enablePhysics={[gravityVector, new CannonJSPlugin()]}
         >
-          <arcRotateCamera
+          {/* <arcRotateCamera
             name="camera"
             target={cameraTarget}
             alpha={(4 * Math.PI) / 4}
@@ -52,7 +53,7 @@ function App() {
             angularSensibilityY={5000}
             wheelDeltaPercentage={0.01}
             minZ={0.001}
-          />
+          /> */}
 
           <hemisphericLight
             name="light1"
@@ -71,10 +72,11 @@ function App() {
           {/* <MainScene /> */}
           {/* <City /> */}
           {/* <FPV /> */}
-          <Room target={cameraTargetHandler} />
+          {/* <Room target={cameraTargetHandler} />
           <MiniCity target={cameraTargetHandler} />
           <Store target={cameraTargetHandler} />
-          <House target={cameraTargetHandler} />
+          <House target={cameraTargetHandler} /> */}
+          <AnimationScenes />
 
           {/* <sphere
             name="sphere1"
