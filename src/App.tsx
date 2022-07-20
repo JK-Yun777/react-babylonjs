@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Engine, Scene, Skybox } from "react-babylonjs";
 import { Vector3, Color3, Color4, CannonJSPlugin } from "@babylonjs/core";
 
@@ -8,37 +7,15 @@ import * as CANNON from "cannon";
 import MainScene from "./MainScene";
 import City from "./City";
 import FPV from "./FPV";
-import Room from "./Room";
-import MiniCity from "./MiniCity";
-import Store from "./Store";
-import House from "./House";
 import AnimationScenes from "./AnimationScenes";
 
 window.CANNON = CANNON;
 const gravityVector = new Vector3(0, -9.81, 0);
-const initCameraTargetVector = Vector3.Zero();
-const initCameraRadius = 5.5;
-const zoomInCameraRadius = 2;
 
 function App() {
-  // const [cameraTarget, setCameraTarget] = useState(initCameraTargetVector);
-  // const [cameraRadius, setCameraRadius] = useState(initCameraRadius);
-
-  // const cameraTargetHandler = (value: any) => {
-  //   const { position, isZoomed } = value;
-
-  //   if (isZoomed) {
-  //     setCameraTarget(position);
-  //     setCameraRadius(zoomInCameraRadius);
-  //   } else {
-  //     setCameraTarget(position);
-  //     setCameraRadius(initCameraRadius);
-  //   }
-  // };
-
   return (
     <>
-      <Engine antialias adaptToDeviceRatio canvasId="babylonJS">
+      <Engine antialias adaptToDeviceRatio canvasId="canvas">
         <Scene
           clearColor={Color4.FromColor3(Color3.FromHexString("#f7f6f0"))}
           enablePhysics={[gravityVector, new CannonJSPlugin()]}
@@ -72,10 +49,6 @@ function App() {
           {/* <MainScene /> */}
           {/* <City /> */}
           {/* <FPV /> */}
-          {/* <Room target={cameraTargetHandler} />
-          <MiniCity target={cameraTargetHandler} />
-          <Store target={cameraTargetHandler} />
-          <House target={cameraTargetHandler} /> */}
           <AnimationScenes />
 
           {/* <sphere

@@ -277,12 +277,9 @@ export class CustomLoadingScreen implements ILoadingScreen {
   }
 }
 
-interface ResultType {
-  animations: any;
-  cameraSetting: any;
-}
-
 const frameRate = 20;
+let currentRadius: number;
+let currentTarget: Vector3;
 
 function getTargetAnimations(
   radius: number,
@@ -306,20 +303,16 @@ function getTargetAnimations(
   });
 
   zoomIn_keys.push({
-    frame: 2 * frameRate,
-    value: radius - 2,
-  });
-
-  zoomIn_keys.push({
-    frame: 3 * frameRate,
+    frame: 1 * frameRate,
     value: radius - 3,
   });
 
   zoomIn.setKeys(zoomIn_keys);
+  currentRadius = radius - 3;
 
   //camera move forward
   const movein = new Animation(
-    "movein",
+    "moveIn",
     "target",
     frameRate,
     Animation.ANIMATIONTYPE_VECTOR3,
@@ -336,17 +329,7 @@ function getTargetAnimations(
 
   movein_room_keys.push({
     frame: 1 * frameRate,
-    value: new Vector3(-0.5, 0, 0.5),
-  });
-
-  movein_room_keys.push({
-    frame: 2 * frameRate,
-    value: new Vector3(-1, 0, 1),
-  });
-
-  movein_room_keys.push({
-    frame: 3 * frameRate,
-    value: new Vector3(-1.5, 0, 1.5),
+    value: new Vector3(-1.5, -0.03, 1.5),
   });
 
   // for Store Model
@@ -359,16 +342,6 @@ function getTargetAnimations(
 
   movein_store_keys.push({
     frame: 1 * frameRate,
-    value: new Vector3(0.1, 0, 0),
-  });
-
-  movein_store_keys.push({
-    frame: 2 * frameRate,
-    value: new Vector3(0.3, 0, 0),
-  });
-
-  movein_store_keys.push({
-    frame: 3 * frameRate,
     value: new Vector3(0.5, 0, 0),
   });
 
@@ -382,16 +355,6 @@ function getTargetAnimations(
 
   movein_miniCity_keys.push({
     frame: 1 * frameRate,
-    value: new Vector3(0, 0.1, 1),
-  });
-
-  movein_miniCity_keys.push({
-    frame: 2 * frameRate,
-    value: new Vector3(0, 0.2, 2),
-  });
-
-  movein_miniCity_keys.push({
-    frame: 3 * frameRate,
     value: new Vector3(0, 0.2, 3),
   });
 
@@ -405,47 +368,29 @@ function getTargetAnimations(
 
   movein_house_keys.push({
     frame: 1 * frameRate,
-    value: new Vector3(0, 0, -1),
-  });
-
-  movein_house_keys.push({
-    frame: 2 * frameRate,
-    value: new Vector3(0, 0, -1.5),
-  });
-
-  movein_house_keys.push({
-    frame: 3 * frameRate,
     value: new Vector3(0, 0, -2),
   });
 
   switch (targetName) {
     case "room":
       movein.setKeys(movein_room_keys);
-      return {
-        animations: [movein, zoomIn],
-        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(-1.5, 0, 1.5) },
-      };
+      currentTarget = new Vector3(-1.5, -0.03, 1.5);
+      return [movein, zoomIn];
 
     case "store":
       movein.setKeys(movein_store_keys);
-      return {
-        animations: [movein, zoomIn],
-        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(0.5, 0, 0) },
-      };
+      currentTarget = new Vector3(0.5, 0, 0);
+      return [movein, zoomIn];
 
     case "miniCity":
       movein.setKeys(movein_miniCity_keys);
-      return {
-        animations: [movein, zoomIn],
-        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(0, 0.2, 3) },
-      };
+      currentTarget = new Vector3(0, 0.2, 3);
+      return [movein, zoomIn];
 
     case "house":
       movein.setKeys(movein_house_keys);
-      return {
-        animations: [movein, zoomIn],
-        cameraSetting: { radius: 2.5, cameraTarget: new Vector3(0, 0, -2) },
-      };
+      currentTarget = new Vector3(0, 0, -2);
+      return [movein, zoomIn];
   }
 }
 
@@ -467,20 +412,71 @@ function getReturnAnimations(
 
   zoomOut_keys.push({
     frame: 0,
-    value: 2.5,
+    value: currentRadius,
   });
 
   zoomOut_keys.push({
-    frame: 2 * frameRate,
-    value: 3.5,
-  });
-
-  zoomOut_keys.push({
-    frame: 3 * frameRate,
-    value: 5.5,
+    frame: 1 * frameRate,
+    value: currentRadius + 3,
   });
 
   zoomOut.setKeys(zoomOut_keys);
+
+  const alpha = new Animation(
+    "alpha",
+    "alpha",
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  const alpha_keys = [];
+
+  alpha_keys.push({
+    frame: 0,
+    value: 3.141592653589793,
+  });
+
+  alpha.setKeys(alpha_keys);
+
+  const roomAlpha = new Animation(
+    "roomAlpha",
+    "alpha",
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  const roomAlpha_keys = [];
+
+  roomAlpha_keys.push({
+    frame: 0,
+    value: 3.2,
+  });
+
+  roomAlpha_keys.push({
+    frame: 1 * frameRate,
+    value: 3.141592653589793,
+  });
+
+  roomAlpha.setKeys(roomAlpha_keys);
+
+  const beta = new Animation(
+    "beta",
+    "beta",
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  const beta_keys = [];
+
+  beta_keys.push({
+    frame: 0,
+    value: 1.078689775673263,
+  });
+
+  beta.setKeys(beta_keys);
 
   //camera move forward
   const moveOut = new Animation(
@@ -492,26 +488,15 @@ function getReturnAnimations(
   );
 
   // for Room Model
-
   const moveOut_room_keys = [];
 
   moveOut_room_keys.push({
     frame: 0,
-    value: new Vector3(-1.5, 0, 1.5),
+    value: currentTarget,
   });
 
   moveOut_room_keys.push({
     frame: 1 * frameRate,
-    value: new Vector3(-1, 0, 1),
-  });
-
-  moveOut_room_keys.push({
-    frame: 2 * frameRate,
-    value: new Vector3(-0.5, 0, 0.5),
-  });
-
-  moveOut_room_keys.push({
-    frame: 3 * frameRate,
     value: Vector3.Zero(),
   });
 
@@ -520,21 +505,11 @@ function getReturnAnimations(
 
   moveOut_store_keys.push({
     frame: 0,
-    value: new Vector3(0.5, 0, 0),
+    value: currentTarget,
   });
 
   moveOut_store_keys.push({
     frame: 1 * frameRate,
-    value: new Vector3(0.3, 0, 0),
-  });
-
-  moveOut_store_keys.push({
-    frame: 2 * frameRate,
-    value: new Vector3(0.1, 0, 0),
-  });
-
-  moveOut_store_keys.push({
-    frame: 3 * frameRate,
     value: Vector3.Zero(),
   });
 
@@ -543,21 +518,11 @@ function getReturnAnimations(
 
   moveOut_miniCity_keys.push({
     frame: 0,
-    value: new Vector3(0, 0.2, 3),
+    value: currentTarget,
   });
 
   moveOut_miniCity_keys.push({
     frame: 1 * frameRate,
-    value: new Vector3(0, 0.2, 2),
-  });
-
-  moveOut_miniCity_keys.push({
-    frame: 2 * frameRate,
-    value: new Vector3(0, 0.1, 1),
-  });
-
-  moveOut_miniCity_keys.push({
-    frame: 3 * frameRate,
     value: Vector3.Zero(),
   });
 
@@ -566,28 +531,18 @@ function getReturnAnimations(
 
   moveOut_house_keys.push({
     frame: 0,
-    value: new Vector3(0, 0, -2),
+    value: currentTarget,
   });
 
   moveOut_house_keys.push({
-    frame: 5 * frameRate,
-    value: new Vector3(0, 0, -1.5),
-  });
-
-  moveOut_house_keys.push({
-    frame: 9 * frameRate,
-    value: new Vector3(0, 0, -1),
-  });
-
-  moveOut_house_keys.push({
-    frame: 10 * frameRate,
+    frame: 1 * frameRate,
     value: Vector3.Zero(),
   });
 
   switch (targetName) {
     case "room":
       moveOut.setKeys(moveOut_room_keys);
-      return [moveOut, zoomOut];
+      return [moveOut, zoomOut, roomAlpha, beta];
 
     case "store":
       moveOut.setKeys(moveOut_store_keys);
@@ -595,26 +550,23 @@ function getReturnAnimations(
 
     case "miniCity":
       moveOut.setKeys(moveOut_miniCity_keys);
-      return [moveOut, zoomOut];
+      return [moveOut, zoomOut, alpha, beta];
 
     case "house":
       moveOut.setKeys(moveOut_house_keys);
-      return [moveOut, zoomOut];
+      return [moveOut, zoomOut, alpha, beta];
   }
 }
 
 export function moveToTargetAnim(camera: any, scene: any, targetName: string) {
-  const result: any = getTargetAnimations(
+  const animations: any = getTargetAnimations(
     camera.radius,
     camera.target,
     targetName
   );
 
-  if (result) {
-    const { animations, cameraSetting } = result;
+  if (animations) {
     scene.beginDirectAnimation(camera, animations, 0, 25 * frameRate, true);
-
-    return cameraSetting;
   }
 }
 
@@ -628,5 +580,8 @@ export function returnToDefaultAnim(
     camera.target,
     targetName
   );
-  scene.beginDirectAnimation(camera, animations, 0, 25 * frameRate, true);
+
+  if (animations) {
+    scene.beginDirectAnimation(camera, animations, 0, 25 * frameRate, true);
+  }
 }

@@ -1,4 +1,5 @@
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
+import { Model, SceneLoaderContextProvider, useScene } from "react-babylonjs";
 import {
   Vector3,
   Color3,
@@ -8,12 +9,6 @@ import {
   CombineAction,
   ArcRotateCamera,
 } from "@babylonjs/core";
-import {
-  Camera,
-  Model,
-  SceneLoaderContextProvider,
-  useScene,
-} from "react-babylonjs";
 import "@babylonjs/loaders";
 
 import { moveToTargetAnim, returnToDefaultAnim } from "./utils";
@@ -23,6 +18,7 @@ const initCameraRadius = 5.5;
 
 function AnimationScenes(): React.ReactElement | null {
   const [isZoomed, setIsZoomed] = useState(false);
+  const [isReturned, setIsReturned] = useState(false);
   const [target, setTarget] = useState("");
 
   const scene = useScene()!;
@@ -34,6 +30,13 @@ function AnimationScenes(): React.ReactElement | null {
     initCameraRadius,
     initCameraTargetVector
   )!;
+
+  camera2.upperBetaLimit = Math.PI / 2;
+  camera2.upperAlphaLimit = 0.5 + Math.PI;
+  camera2.lowerAlphaLimit = -0.5 + Math.PI;
+  camera2.wheelDeltaPercentage = 0.01;
+  camera2.angularSensibilityX = 5000;
+  camera2.angularSensibilityY = 5000;
 
   scene.activeCameras!.push(camera2);
   camera2.attachControl(true);
@@ -74,6 +77,7 @@ function AnimationScenes(): React.ReactElement | null {
         new CombineAction(ActionManager.NothingTrigger, [
           new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
             setIsZoomed((isZoomed) => !isZoomed);
+            setIsReturned(true);
             setTarget(model.rootMesh.name);
           }),
         ])
@@ -91,25 +95,20 @@ function AnimationScenes(): React.ReactElement | null {
         new CombineAction(ActionManager.NothingTrigger, [
           new ExecuteCodeAction(ActionManager.OnPickTrigger, function (evt) {
             setIsZoomed((isZoomed) => !isZoomed);
+            setIsReturned(true);
             setTarget(model.rootMesh.name);
           }),
         ])
       );
   };
 
-  useEffect(() => {
-    if (isZoomed) {
-      const result = moveToTargetAnim(camera2, scene, target);
+  if (isZoomed) {
+    moveToTargetAnim(camera2, scene, target);
+  }
 
-      if (result) {
-        const { radius, cameraTarget } = result;
-        camera2.radius = radius;
-        camera2.setTarget(cameraTarget);
-      }
-    } else {
-      returnToDefaultAnim(camera2, scene, target);
-    }
-  }, [isZoomed, target, camera2, scene]);
+  if (!isZoomed && isReturned) {
+    returnToDefaultAnim(camera2, scene, target);
+  }
 
   return (
     <>
